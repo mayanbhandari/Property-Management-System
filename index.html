@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Search</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            text-align: center;
+            font-size: 2em;
+            border-bottom: 5px solid #333;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        .search-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-field {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .multi-field-row {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .multi-field-row .search-field {
+            flex: 1;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="submit"],
+        input[type="button"] {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        input[type="button"].clear-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        input[type="button"].clear-button:hover {
+            background-color: #e53935;
+        }
+
+        input[type="button"].close-button {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        input[type="button"].close-button:hover {
+            background-color: #1e88e5;
+        }
+
+        input[type="button"].download-button {
+            background-color: #FFC107;
+            color: white;
+            font-weight: bold;
+        }
+
+        input[type="button"].download-button:hover {
+            background-color: #ffb300;
+        }
+
+        #results-container {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            display: table;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .address-row {
+            background-color: #e1f5fe;
+            font-weight: bold;
+        }
+
+        .download-container {
+            text-align: right;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Search Property Details &nbsp; As On: {{current_date}}</h1>
+
+    <div class="search-container">
+        <div class="search-fields">
+            <div class="search-field">
+                <label for="upicSearch">UPIC</label>
+                <input type="text" id="upicSearch" placeholder="Enter UPIC...">
+            </div>
+            <div class="search-field">
+                <label for="propertySearch">Address</label>
+                <input type="text" id="propertySearch" placeholder="Enter property address...">
+            </div>
+            <div class="multi-field-row">
+                <div class="search-field">
+                    <label for="wardSearch">Ward</label>
+                    <select id="wardSearch">
+                        <option value="">Select Ward</option>
+                        <!-- Add ward options here -->
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label for="colonySearch">Colony</label>
+                    <select id="colonySearch">
+                        <option value="">Select Colony</option>
+                        <!-- Add colony options here -->
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label for="zoneSearch">Zone</label>
+                    <select id="zoneSearch" onchange="updateWards()">
+                        <option value="">Select Zone</option>
+                        <!-- Add zone options here -->
+                    </select>
+                </div>
+            </div>
+            <div class="multi-field-row">
+                <div class="search-field">
+                    <label for="propertyType">Property Type</label>
+                    <select id="propertyType">
+                        <option value="">Select Property Type</option>
+                        <!-- Add Property Type options here -->
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label for="propertyCategory">Property Category</label>
+                    <select id="propertyCategory">
+                        <option value="">Select Property Category</option>
+                        <!-- Add Property Category options here -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons-container">
+            <input type="submit" value="Search" onclick="searchPropertyAndUpic()">
+            <input type="button" value="Clear" class="clear-button" onclick="clearSearch()">
+            <input type="button" value="Close" class="close-button" onclick="closeTable()">
+        </div>
+    </div>
+
+    <div id="results-container">
+        <div class="download-container" id="download-container">
+            <input type="button" value="Download as PDF" class="download-button" onclick="downloadPDF()">
+            <input type="button" value="Download as Excel" class="download-button" onclick="downloadExcel()">
+            <input type="button" value="Download as CSV" class="download-button" onclick="downloadCSV()">
+        </div>
+
+        <div id="results-table-wrapper"></div>
+    </div>
+
+    <script>
+        const zoneWardMapping = {
+            "SHAHDARA ZONE": ["RAM NAGAR", "ASHOK NAGAR", "SHASTRI PARK"],
+            "NAJAFGARH ZONE": ["Ward 4", "Ward 5", "Ward 6"],
+            "NAJAFGARH ZONE": ["Ward 4", "Ward 5", "Ward 6"],
+            "NAJAFGARH ZONE": ["Ward 4", "Ward 5", "Ward 6"],
+            "NAJAFGARH ZONE": ["Ward 4", "Ward 5", "Ward 6"],
+            "NAJAFGARH ZONE": ["Ward 4", "Ward 5", "Ward 6"],
+            
+        };
+
+        function populateZones() {
+            const zoneSelect = document.getElementById('zoneSearch');
+            for (const zone in zoneWardMapping) {
+                const option = document.createElement('option');
+                option.value = zone;
+                option.textContent = zone;
+                zoneSelect.appendChild(option);
+            }
+        }
+
+        function updateWards() {
+            const zoneSelect = document.getElementById('zoneSearch');
+            const wardSelect = document.getElementById('wardSearch');
+            const selectedZone = zoneSelect.value;
+
+            // Clear previous wards
+            wardSelect.innerHTML = '<option value="">Select Ward</option>';
+
+            if (selectedZone && zoneWardMapping[selectedZone]) {
+                zoneWardMapping[selectedZone].forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward;
+                    option.textContent = ward;
+                    wardSelect.appendChild(option);
+                });
+            }
+        }
+
+        populateZones(); // Initialize zones on page load
+
+        function searchPropertyAndUpic() {
+            const propertyQuery = document.getElementById('propertySearch').value;
+            const upicQuery = document.getElementById('upicSearch').value;
+            const wardQuery = document.getElementById('wardSearch').value;
+            const colonyQuery = document.getElementById('colonySearch').value;
+            const zoneQuery = document.getElementById('zoneSearch').value;
+
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    searchQuery: propertyQuery,
+                    upicQuery: upicQuery,
+                    wardQuery: wardQuery,
+                    colonyQuery: colonyQuery,
+                    zoneQuery: zoneQuery
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('results-container');
+            container.style.display = 'block'; // Show the container
+
+            const tableWrapper = document.getElementById('results-table-wrapper');
+            tableWrapper.innerHTML = ''; // Clear previous results
+
+            if (results.length === 0) {
+                tableWrapper.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.id = "resultsTable"; // Assign an ID for future reference
+            const headerRow = document.createElement('tr');
+
+            const headers = [
+                { displayName: 'UPIC', key: 'upic' },
+                { displayName: 'Property Address', key: 'property_address' },
+                { displayName: 'Pincode', key: 'pincode' },
+                { displayName: 'Ward', key: 'ward_name' },
+                { displayName: 'Colony', key: 'colony_name' },
+                { displayName: 'Zone', key: 'zone_name' },
+                { displayName: 'Property Type', key: 'property_type_name' },
+                { displayName: 'Owner Name', key: 'owner_name' },
+                { displayName: 'Mobile Number', key: 'mobile_number' },
+                { displayName: 'Floor Count', key: 'floor_count' },
+                { displayName: 'Floor Names', key: 'floor_name' },
+                { displayName: 'Upic Drafted', key: 'is_drafted' },
+                { displayName: 'Upic Registered', key: 'is_registered' },
+                { displayName: 'Created Date', key: 'created_date' },
+                { displayName: 'Modified Date', key: 'modified_date' }
+            ];
+
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header.displayName;
+                headerRow.appendChild(th);
+            });
+
+            table.appendChild(headerRow);
+
+            results.forEach(result => {
+                const row = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = result[header.key] || '';
+                    row.appendChild(td);
+                });
+
+                table.appendChild(row);
+            });
+
+            tableWrapper.appendChild(table);
+
+            // Show the download options if results are present
+            const downloadContainer = document.getElementById('download-container');
+            downloadContainer.style.display = 'block';
+        }
+
+        function clearSearch() {
+            document.getElementById('propertySearch').value = '';
+            document.getElementById('upicSearch').value = '';
+            document.getElementById('wardSearch').value = '';
+            document.getElementById('colonySearch').value = '';
+            document.getElementById('zoneSearch').value = '';
+        }
+
+        function closeTable() {
+            const container = document.getElementById('results-container');
+            container.style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>
